@@ -1,0 +1,22 @@
+# OpenHands Dev AI Agent Dependencies
+
+# OpenHands SDK - Core agent engine
+openhands-sdk>=1.0.0
+openhands-tools>=1.0.0
+
+# Web Framework
+fastapi>=0.104.0
+uvicorn[standard]>=0.24.0
+
+# WebSocket support
+websockets>=12.0
+python-socketio>=5.10.0
+
+# Async support
+aiofiles>=23.2.0
+
+# File watching
+watchdog>=3.0.0
+
+# CORS support
+python-multipart>=0.0.6

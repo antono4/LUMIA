@@ -1,0 +1,10 @@
+__pycache__/
+*.pyc
+.env
+venv/
+.venv/
+bash_events/
+conversations/
+project/
+*.log
+.DS_Store

@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OpenHands Agent - Architecture Flow</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .node {
+            transition: all 0.3s ease;
+        }
+        .node:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 40px rgba(79, 70, 229, 0.3);
+        }
+        .arrow {
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 0.6; }
+            50% { opacity: 1; }
+        }
+        .step-number {
+            animation: fadeInUp 0.5s ease forwards;
+            opacity: 0;
+        }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="bg-gray-900 min-h-screen p-8">
+    <div class="max-w-6xl mx-auto">
+        <h1 class="text-3xl font-bold text-white mb-2">OpenHands Dev Agent - Architecture Flow</h1>
+        <p class="text-gray-400 mb-8">Alur kerja AI Agent sesuai UI Mockup</p>
+        
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <!-- Flow Diagram -->
+            <div class="bg-gray-800 rounded-2xl p-6">
+                <h2 class="text-xl font-semibold text-white mb-6 flex items-center gap-2">
+                    <span class="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center text-sm">📊</span>
+                    Flow Diagram
+                </h2>
+                
+                <div class="space-y-6">
+                    <!-- User -->
+                    <div class="node bg-gradient-to-r from-blue-600 to-blue-700 rounded-xl p-4 text-center">
+                        <div class="text-2xl mb-2">👤</div>
+                        <div class="text-white font-semibold">User</div>
+                        <div class="text-blue-200 text-sm">Mengirim instruksi via UI</div>
+                    </div>
+                    
+                    <!-- Arrow -->
+                    <div class="flex justify-center">
+                        <div class="arrow text-2xl">⬇️</div>
+                    </div>
+                    
+                    <!-- UI Frontend -->
+                    <div class="node bg-gradient-to-r from-purple-600 to-pink-600 rounded-xl p-4">
+                        <div class="flex items-center gap-3 mb-3">
+                            <span class="text-2xl">🎨</span>
+                            <div>
+                                <div class="text-white font-semibold">UI Frontend</div>
+                                <div class="text-purple-200 text-sm">HTML Mockup + JavaScript</div>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-3 gap-2 text-xs">
+                            <div class="bg-black/30 rounded p-2 text-center">
+                                <div>📱</div>
+                                <div class="text-white">Activity Bar</div>
+                            </div>
+                            <div class="bg-black/30 rounded p-2 text-center">
+                                <div>💬</div>
+                                <div class="text-white">Chat Panel</div>
+                            </div>
+                            <div class="bg-black/30 rounded p-2 text-center">
+                                <div>💻</div>
+                                <div class="text-white">Workspace</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Arrow -->
+                    <div class="flex justify-center">
+                        <div class="arrow text-2xl">⬇️</div>
+                    </div>
+                    
+                    <!-- API / WebSocket -->
+                    <div class="node bg-gradient-to-r from-green-600 to-emerald-600 rounded-xl p-4">
+                        <div class="flex items-center gap-3 mb-3">
+                            <span class="text-2xl">🔌</span>
+                            <div>
+                                <div class="text-white font-semibold">API Server</div>
+                                <div class="text-green-200 text-sm">FastAPI + WebSocket</div>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2 text-xs">
+                            <div class="bg-black/30 rounded p-2 text-center">
+                                <div>📡</div>
+                                <div class="text-white">REST API</div>
+                            </div>
+                            <div class="bg-black/30 rounded p-2 text-center">
+                                <div>🔄</div>
+                                <div class="text-white">WebSocket</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Arrow -->
+                    <div class="flex justify-center">
+                        <div class="arrow text-2xl">⬇️</div>
+                    </div>
+                    
+                    <!-- OpenHands SDK -->
+                    <div class="node bg-gradient-to-r from-indigo-600 to-violet-600 rounded-xl p-4">
+                        <div class="flex items-center gap-3 mb-3">
+                            <span class="text-2xl">🤖</span>
+                            <div>
+                                <div class="text-white font-semibold">OpenHands SDK</div>
+                                <div class="text-indigo-200 text-sm">Agent Engine</div>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-4 gap-2 text-xs">
+                            <div class="bg-black/30 rounded p-2 text-center">
+                                <div>🧠</div>
+                                <div class="text-white">LLM</div>
+                            </div>
+                            <div class="bg-black/30 rounded p-2 text-center">
+                                <div>🎯</div>
+                                <div class="text-white">Agent</div>
+                            </div>
+                            <div class="bg-black/30 rounded p-2 text-center">
+                                <div>💬</div>
+                                <div class="text-white">Conversation</div>
+                            </div>
+                            <div class="bg-black/30 rounded p-2 text-center">
+                                <div>🛠️</div>
+                                <div class="text-white">Tools</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Arrow -->
+                    <div class="flex justify-center">
+                        <div class="arrow text-2xl">⬇️</div>
+                    </div>
+                    
+                    <!-- Workspace -->
+                    <div class="node bg-gradient-to-r from-yellow-600 to-orange-600 rounded-xl p-4 text-center">
+                        <div class="text-2xl mb-2">📁</div>
+                        <div class="text-white font-semibold">Workspace</div>
+                        <div class="text-yellow-200 text-sm">/workspace/app - File System</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Implementation Steps -->
+            <div class="space-y-6">
+                <!-- Steps -->
+                <div class="bg-gray-800 rounded-2xl p-6">
+                    <h2 class="text-xl font-semibold text-white mb-6 flex items-center gap-2">
+                        <span class="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center text-sm">📝</span>
+                        Implementation Steps
+                    </h2>
+                    
+                    <div class="space-y-4">
+                        <div class="step-number flex items-start gap-4 bg-gray-700/50 rounded-lg p-4" style="animation-delay: 0.1s">
+                            <div class="w-8 h-8 bg-green-600 rounded-full flex items-center justify-center text-white font-bold flex-shrink-0">1</div>
+                            <div>
+                                <div class="text-white font-medium">Install Dependencies</div>
+                                <div class="text-gray-400 text-sm">pip install openhands-sdk openhands-tools fastapi uvicorn</div>
+                            </div>
+                        </div>
+                        
+                        <div class="step-number flex items-start gap-4 bg-gray-700/50 rounded-lg p-4" style="animation-delay: 0.2s">
+                            <div class="w-8 h-8 bg-green-600 rounded-full flex items-center justify-center text-white font-bold flex-shrink-0">2</div>
+                            <div>
+                                <div class="text-white font-medium">Create Agent Server</div>
+                                <div class="text-gray-400 text-sm">dev_agent.py - OpenHands agent configuration</div>
+                            </div>
+                        </div>
+                        
+                        <div class="step-number flex items-start gap-4 bg-gray-700/50 rounded-lg p-4" style="animation-delay: 0.3s">
+                            <div class="w-8 h-8 bg-green-600 rounded-full flex items-center justify-center text-white font-bold flex-shrink-0">3</div>
+                            <div>
+                                <div class="text-white font-medium">Create API Routes</div>
+                                <div class="text-gray-400 text-sm">FastAPI endpoints for chat, files, terminal</div>
+                            </div>
+                        </div>
+                        
+                        <div class="step-number flex items-start gap-4 bg-gray-700/50 rounded-lg p-4" style="animation-delay: 0.4s">
+                            <div class="w-8 h-8 bg-green-600 rounded-full flex items-center justify-center text-white font-bold flex-shrink-0">4</div>
+                            <div>
+                                <div class="text-white font-medium">Setup WebSocket</div>
+                                <div class="text-gray-400 text-sm">Real-time communication for streaming output</div>
+                            </div>
+                        </div>
+                        
+                        <div class="step-number flex items-start gap-4 bg-gray-700/50 rounded-lg p-4" style="animation-delay: 0.5s">
+                            <div class="w-8 h-8 bg-green-600 rounded-full flex items-center justify-center text-white font-bold flex-shrink-0">5</div>
+                            <div>
+                                <div class="text-white font-medium">Update UI</div>
+                                <div class="text-gray-400 text-sm">Connect HTML mockup to agent server</div>
+                            </div>
+                        </div>
+                        
+                        <div class="step-number flex items-start gap-4 bg-gray-700/50 rounded-lg p-4" style="animation-delay: 0.6s">
+                            <div class="w-8 h-8 bg-green-600 rounded-full flex items-center justify-center text-white font-bold flex-shrink-0">6</div>
+                            <div>
+                                <div class="text-white font-medium">Run & Test</div>
+                                <div class="text-gray-400 text-sm">Start server and test the complete workflow</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Tools Used -->
+                <div class="bg-gray-800 rounded-2xl p-6">
+                    <h2 class="text-xl font-semibold text-white mb-4 flex items-center gap-2">
+                        <span class="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center text-sm">🛠️</span>
+                        OpenHands Tools
+                    </h2>
+                    
+                    <div class="grid grid-cols-1 gap-3">
+                        <div class="bg-gray-700/50 rounded-lg p-3 flex items-center gap-3">
+                            <span class="text-xl">💻</span>
+                            <div>
+                                <div class="text-white font-medium">TerminalTool</div>
+                                <div class="text-gray-400 text-sm">Execute shell commands</div>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-gray-700/50 rounded-lg p-3 flex items-center gap-3">
+                            <span class="text-xl">📝</span>
+                            <div>
+                                <div class="text-white font-medium">FileEditorTool</div>
+                                <div class="text-gray-400 text-sm">Read/write/edit files</div>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-gray-700/50 rounded-lg p-3 flex items-center gap-3">
+                            <span class="text-xl">✅</span>
+                            <div>
+                                <div class="text-white font-medium">TaskTrackerTool</div>
+                                <div class="text-gray-400 text-sm">Track tasks and progress</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Quick Start -->
+                <div class="bg-gradient-to-r from-indigo-600 to-purple-600 rounded-2xl p-6">
+                    <h2 class="text-xl font-semibold text-white mb-4">🚀 Quick Start</h2>
+                    <div class="bg-black/30 rounded-lg p-4 font-mono text-sm">
+                        <div class="text-gray-400"># Set API Key</div>
+                        <div class="text-green-400">export LLM_API_KEY=your-key</div>
+                        <div class="mt-2 text-gray-400"># Run Agent</div>
+                        <div class="text-green-400">python agent_server.py</div>
+                        <div class="mt-2 text-gray-400"># Open UI</div>
+                        <div class="text-green-400">http://localhost:8000</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

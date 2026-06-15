@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dev AI Agent - OpenHands</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Tailwind Config for Custom Colors -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        dark: {
+                            900: '#0d1117',
+                            800: '#161b22',
+                            700: '#21262d',
+                            600: '#30363d',
+                        },
+                        brand: {
+                            500: '#4f46e5',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0d1117;
+            color: #c9d1d9;
+        }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 10px;
+            height: 10px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0d1117;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #30363d;
+            border-radius: 5px;
+            border: 2px solid #0d1117;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #484f58;
+        }
+
+        /* Line numbers for code editor */
+        .line-numbers {
+            counter-reset: line;
+        }
+        .line-numbers > div {
+            position: relative;
+            padding-left: 3rem;
+        }
+        .line-numbers > div::before {
+            counter-increment: line;
+            content: counter(line);
+            position: absolute;
+            left: 0;
+            width: 2rem;
+            text-align: right;
+            color: #6e7681;
+            font-size: 0.85rem;
+        }
+
+        /* Blinking cursor */
+        .cursor-blink {
+            animation: blink 1s step-end infinite;
+        }
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+
+        /* Fade in animation */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Pulse animation for status */
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* Thinking dots animation */
+        .thinking-dots span {
+            animation: bounce 1.4s infinite ease-in-out both;
+        }
+        .thinking-dots span:nth-child(1) { animation-delay: -0.32s; }
+        .thinking-dots span:nth-child(2) { animation-delay: -0.16s; }
+        .thinking-dots span:nth-child(3) { animation-delay: 0s; }
+        @keyframes bounce {
+            0%, 80%, 100% { transform: scale(0); }
+            40% { transform: scale(1); }
+        }
+    </style>
+</head>
+<body class="h-screen w-screen flex overflow-hidden text-sm">
+
+    <!-- Activity Bar (Far Left) -->
+    <nav class="w-14 flex-shrink-0 bg-dark-900 border-r border-dark-700 flex flex-col items-center py-4 z-20">
+        <!-- Logo -->
+        <div class="w-8 h-8 bg-brand-500 rounded-lg flex items-center justify-center mb-6 cursor-pointer hover:opacity-80 transition-opacity" title="OpenHands Agent">
+            <i data-lucide="bot" class="w-5 h-5 text-white"></i>
+        </div>
+
+        <!-- Top Nav Icons -->
+        <div class="flex flex-col gap-4 w-full">
+            <button id="nav-chat" class="relative w-full py-2 flex justify-center text-white border-l-2 border-brand-500 bg-dark-800" title="Chat">
+                <i data-lucide="message-square" class="w-5 h-5"></i>
+            </button>
+            <button id="nav-files" class="relative w-full py-2 flex justify-center text-gray-500 hover:text-gray-300 transition-colors" title="Files">
+                <i data-lucide="folder-code" class="w-5 h-5"></i>
+            </button>
+            <button id="nav-git" class="relative w-full py-2 flex justify-center text-gray-500 hover:text-gray-300 transition-colors" title="Git">
+                <i data-lucide="git-branch" class="w-5 h-5"></i>
+            </button>
+        </div>
+
+        <!-- Bottom Nav Icons -->
+        <div class="mt-auto flex flex-col gap-4 w-full mb-2">
+            <button id="nav-settings" class="relative w-full py-2 flex justify-center text-gray-500 hover:text-gray-300 transition-colors" title="Settings">
+                <i data-lucide="settings" class="w-5 h-5"></i>
+            </button>
+            <button class="relative w-full py-2 flex justify-center text-gray-500 hover:text-gray-300 transition-colors" title="User">
+                <div class="w-6 h-6 rounded-full bg-blue-900 border border-blue-500 flex items-center justify-center text-[10px] font-bold text-blue-200">
+                    OH
+                </div>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Chat Panel (Left Half) -->
+    <section class="w-full md:w-[400px] lg:w-[450px] flex-shrink-0 bg-dark-800 border-r border-dark-700 flex flex-col relative z-10 transition-all duration-300" id="chat-panel">
+        
+        <!-- Chat Header -->
+        <header class="h-14 border-b border-dark-700 flex items-center justify-between px-4 bg-dark-800/90 backdrop-blur">
+            <div class="flex items-center gap-2">
+                <span class="font-semibold text-gray-200">Agent Chat</span>
+                <span id="status-badge" class="px-2 py-0.5 rounded-full bg-green-500/10 border border-green-500/20 text-green-400 text-[10px] font-medium flex items-center gap-1">
+                    <span class="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span>
+                    Ready
+                </span>
+            </div>
+            <div class="flex items-center gap-2">
+                <button id="btn-new-session" class="p-1.5 hover:bg-dark-700 rounded text-gray-400 hover:text-gray-200 transition-colors" title="New Session">
+                    <i data-lucide="plus" class="w-4 h-4"></i>
+                </button>
+                <button id="btn-toggle-workspace" class="p-1.5 hover:bg-dark-700 rounded text-gray-400 hover:text-gray-200 transition-colors md:hidden" title="Toggle Workspace">
+                    <i data-lucide="layout-panel-left" class="w-4 h-4"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- Configuration Bar -->
+        <div class="px-4 py-2 border-b border-dark-700 bg-dark-900/50 flex gap-2 overflow-x-auto no-scrollbar text-xs">
+            <div id="model-selector" class="flex items-center gap-1.5 px-2.5 py-1.5 rounded bg-dark-700 text-gray-300 border border-dark-600 whitespace-nowrap cursor-pointer hover:bg-dark-600 transition-colors">
+                <i data-lucide="cpu" class="w-3.5 h-3.5 text-blue-400"></i>
+                <span id="model-name">OpenHands</span>
+                <i data-lucide="chevron-down" class="w-3 h-3 text-gray-500"></i>
+            </div>
+            <div id="workspace-selector" class="flex items-center gap-1.5 px-2.5 py-1.5 rounded bg-dark-700 text-gray-300 border border-dark-600 whitespace-nowrap cursor-pointer hover:bg-dark-600 transition-colors">
+                <i data-lucide="folder" class="w-3.5 h-3.5 text-yellow-500"></i>
+                <span id="workspace-path">/workspace</span>
+                <i data-lucide="chevron-down" class="w-3 h-3 text-gray-500"></i>
+            </div>
+        </div>
+
+        <!-- Chat Messages -->
+        <div class="flex-1 overflow-y-auto p-4 space-y-6" id="chat-messages">
+            
+            <!-- Agent Intro Message (will be populated by JS) -->
+            <div id="intro-message" class="flex gap-3">
+                <div class="w-8 h-8 rounded bg-brand-500 flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <i data-lucide="bot" class="w-5 h-5 text-white"></i>
+                </div>
+                <div class="flex-1 space-y-2">
+                    <p class="text-gray-300 leading-relaxed text-sm">
+                        Halo! Saya adalah <strong>Dev AI Agent</strong> powered by <span class="text-brand-500 font-semibold">OpenHands</span>.
+                    </p>
+                    <p class="text-gray-300 leading-relaxed text-sm">
+                        Ruang kerja saya adalah <code id="intro-workspace" class="bg-dark-700 px-1 py-0.5 rounded text-xs text-blue-300">/workspace</code>
+                    </p>
+                    <p class="text-gray-400 text-sm">
+                        Saya bisa membantu Anda:
+                    </p>
+                    <ul class="text-gray-400 text-sm space-y-1 ml-4">
+                        <li>📁 <strong>File Operations</strong> - Membaca, menulis, dan mengedit file</li>
+                        <li>💻 <strong>Terminal Commands</strong> - Menjalankan perintah shell</li>
+                        <li>🔍 <strong>Code Analysis</strong> - Menganalisis dan memahami kode</li>
+                        <li>🛠️ <strong>Development Tasks</strong> - Membantu development aplikasi</li>
+                    </ul>
+                    <p class="text-gray-400 text-sm pt-2">
+                        Apa yang ingin kita bangun atau perbaiki hari ini?
+                    </p>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Chat Input -->
+        <div class="border-t border-dark-700 p-4 bg-dark-800">
+            <form id="agent-form" class="flex gap-3">
+                <div class="flex-1 relative">
+                    <textarea 
+                        id="agent-input" 
+                        placeholder="Ketik pesan atau instruksi untuk agent..." 
+                        rows="1"
+                        class="w-full bg-dark-900 border border-dark-600 rounded-xl px-4 py-3 pr-12 text-gray-200 placeholder-gray-500 resize-none focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition-all text-sm"
+                    ></textarea>
+                    <button type="submit" class="absolute right-2 bottom-2 p-1.5 bg-brand-500 hover:bg-brand-600 rounded-lg text-white transition-colors">
+                        <i data-lucide="send" class="w-4 h-4"></i>
+                    </button>
+                </div>
+            </form>
+            <div class="flex items-center justify-between mt-2 text-[10px] text-gray-500">
+                <span>Tekan Enter untuk kirim, Shift+Enter untuk baris baru</span>
+                <span id="char-count">0 characters</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- Workspace Panel (Right Side) -->
+    <main class="flex-1 flex flex-col bg-dark-900 overflow-hidden" id="workspace-panel">
+        
+        <!-- Tab Bar -->
+        <div class="h-10 bg-dark-800 border-b border-dark-700 flex items-stretch">
+            <button id="tab-code" class="tab-btn px-4 flex items-center gap-2 text-gray-400 border-t-2 border-t-transparent hover:text-gray-200 hover:bg-dark-700/50 transition-colors" data-tab="code">
+                <i data-lucide="code-2" class="w-4 h-4"></i>
+                <span>Code</span>
+            </button>
+            <button id="tab-terminal" class="tab-btn px-4 flex items-center gap-2 text-gray-400 border-t-2 border-t-transparent hover:text-gray-200 hover:bg-dark-700/50 transition-colors" data-tab="terminal">
+                <i data-lucide="terminal" class="w-4 h-4"></i>
+                <span>Terminal</span>
+            </button>
+            <button id="tab-browser" class="tab-btn px-4 flex items-center gap-2 text-gray-400 border-t-2 border-t-transparent hover:text-gray-200 hover:bg-dark-700/50 transition-colors" data-tab="browser">
+                <i data-lucide="globe" class="w-4 h-4"></i>
+                <span>Preview</span>
+            </button>
+            
+            <!-- Window Controls -->
+            <div class="ml-auto flex items-center gap-1 px-2">
+                <button class="p-1.5 hover:bg-dark-700 rounded text-gray-500 hover:text-gray-300 transition-colors" title="Minimize">
+                    <i data-lucide="minus" class="w-4 h-4"></i>
+                </button>
+                <button class="p-1.5 hover:bg-dark-700 rounded text-gray-500 hover:text-gray-300 transition-colors" title="Maximize">
+                    <i data-lucide="square" class="w-4 h-4"></i>
+                </button>
+                <button class="p-1.5 hover:bg-dark-700 rounded text-gray-500 hover:text-gray-300 transition-colors" title="Close">
+                    <i data-lucide="x" class="w-4 h-4"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Content Views -->
+        <div class="flex-1 overflow-hidden">
+            
+            <!-- Code Editor View -->
+            <div id="view-code" class="h-full flex flex-col">
+                <!-- File Tree -->
+                <div class="h-48 border-b border-dark-700 overflow-y-auto bg-dark-800/50">
+                    <div class="p-2 text-xs text-gray-500 uppercase tracking-wider font-semibold">Explorer</div>
+                    <div id="file-tree" class="px-2 space-y-0.5">
+                        <!-- Files will be populated here -->
+                        <div class="text-gray-400 text-sm p-2 text-center">
+                            <i data-lucide="folder-open" class="w-8 h-8 mx-auto mb-2 text-gray-600"></i>
+                            <p>No files in workspace</p>
+                            <p class="text-xs mt-1">Files will appear here</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Code Editor -->
+                <div class="flex-1 overflow-hidden">
+                    <div class="h-full bg-dark-900 flex items-center justify-center text-gray-500">
+                        <div class="text-center">
+                            <i data-lucide="file-code" class="w-12 h-12 mx-auto mb-3 text-gray-600"></i>
+                            <p>Select a file to view</p>
+                            <p class="text-xs mt-1">or ask the agent to create/modify files</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Terminal View -->
+            <div id="view-terminal" class="h-full hidden">
+                <div class="h-full bg-dark-900 p-4 font-mono text-sm overflow-y-auto">
+                    <div class="text-gray-500 mb-4">
+                        <div class="flex items-center gap-2 mb-2">
+                            <span class="w-2 h-2 rounded-full bg-green-500"></span>
+                            <span class="text-green-400">Terminal Ready</span>
+                        </div>
+                        <p class="text-xs">Workspace: <span id="terminal-workspace">/workspace</span></p>
+                    </div>
+                    
+                    <!-- Terminal Output -->
+                    <div id="terminal-output" class="space-y-1 text-gray-300">
+                        <div><span class="text-blue-400">$</span> <span class="text-gray-500">Welcome to OpenHands Terminal</span></div>
+                    </div>
+                    
+                    <!-- Terminal Input -->
+                    <div class="mt-4 flex items-center">
+                        <span class="text-blue-400 mr-2">$</span>
+                        <input type="text" id="terminal-input" placeholder="Type command..." 
+                               class="flex-1 bg-transparent border-none outline-none text-gray-200 placeholder-gray-600">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Browser Preview View -->
+            <div id="view-browser" class="h-full hidden flex-col">
+                <div class="flex-1 bg-dark-800 flex items-center justify-center">
+                    <div class="text-center text-gray-500">
+                        <i data-lucide="globe" class="w-12 h-12 mx-auto mb-3 text-gray-600"></i>
+                        <p>Web Preview</p>
+                        <p class="text-xs mt-1">Preview your web application here</p>
+                        <button id="btn-open-preview" class="mt-4 px-4 py-2 bg-brand-500 hover:bg-brand-600 text-white rounded-lg text-sm transition-colors">
+                            Open Preview
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Templates for Dynamic Messages -->
+    <template id="user-msg-template">
+        <div class="flex justify-end gap-3 pt-4 animate-[fadeIn_0.3s_ease-out]">
+            <div class="bg-dark-700 border border-dark-600 px-4 py-2.5 rounded-xl rounded-tr-sm max-w-[85%] text-gray-200">
+                <p class="msg-text whitespace-pre-wrap text-sm"></p>
+            </div>
+        </div>
+    </template>
+
+    <template id="agent-msg-template">
+        <div class="flex gap-3 pt-4 animate-[fadeIn_0.3s_ease-out]">
+            <div class="w-8 h-8 rounded bg-brand-500 flex items-center justify-center flex-shrink-0 mt-0.5">
+                <i data-lucide="bot" class="w-5 h-5 text-white"></i>
+            </div>
+            <div class="flex-1 space-y-3">
+                <p class="text-gray-300 leading-relaxed text-sm msg-text"></p>
+                <div class="msg-actions hidden"></div>
+            </div>
+        </div>
+    </template>
+
+    <template id="thinking-template">
+        <div class="flex gap-3 pt-4 animate-[fadeIn_0.3s_ease-out]" id="thinking-indicator">
+            <div class="w-8 h-8 rounded bg-brand-500 flex items-center justify-center flex-shrink-0 mt-0.5">
+                <i data-lucide="bot" class="w-5 h-5 text-white"></i>
+            </div>
+            <div class="flex-1 space-y-3">
+                <div class="flex items-center gap-2 text-gray-400 text-sm">
+                    <div class="thinking-dots flex gap-1">
+                        <span class="w-1.5 h-1.5 rounded-full bg-brand-500"></span>
+                        <span class="w-1.5 h-1.5 rounded-full bg-brand-500"></span>
+                        <span class="w-1.5 h-1.5 rounded-full bg-brand-500"></span>
+                    </div>
+                    <span id="thinking-text">Agent sedang berpikir...</span>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <template id="action-card-template">
+        <div class="border border-dark-700 rounded-lg overflow-hidden bg-dark-900">
+            <div class="flex items-center justify-between px-3 py-2 bg-dark-800 border-b border-dark-700">
+                <div class="flex items-center gap-2 text-xs text-gray-400">
+                    <i class="action-icon w-3.5 h-3.5"></i>
+                    <span class="action-title">Action</span>
+                </div>
+                <span class="action-status text-[10px] font-mono px-1.5 py-0.5 rounded"></span>
+            </div>
+            <div class="p-3 text-xs font-mono text-gray-400">
+                <pre class="action-content whitespace-pre-wrap"></pre>
+            </div>
+        </div>
+    </template>
+
+    <script>
+        // ============== Configuration ==============
+        const CONFIG = {
+            API_BASE: window.location.origin,
+            WS_URL: `ws://${window.location.host}/ws`,
+            DEFAULT_WORKSPACE: '/workspace'
+        };
+
+        // ============== State ==============
+        const state = {
+            ws: null,
+            connected: false,
+            agentStatus: 'connecting',
+            workspacePath: CONFIG.DEFAULT_WORKSPACE,
+            chatHistory: []
+        };
+
+        // ============== DOM Elements ==============
+        const elements = {
+            chatMessages: document.getElementById('chat-messages'),
+            agentInput: document.getElementById('agent-input'),
+            agentForm: document.getElementById('agent-form'),
+            statusBadge: document.getElementById('status-badge'),
+            workspacePath: document.getElementById('workspace-path'),
+            introWorkspace: document.getElementById('intro-workspace'),
+            terminalOutput: document.getElementById('terminal-output'),
+            terminalInput: document.getElementById('terminal-input'),
+            fileTree: document.getElementById('file-tree'),
+            charCount: document.getElementById('char-count')
+        };
+
+        // ============== Initialize ==============
+        function init() {
+            lucide.createIcons();
+            setupEventListeners();
+            connectWebSocket();
+            updateStatus('connecting');
+        }
+
+        // ============== WebSocket Connection ==============
+        function connectWebSocket() {
+            try {
+                state.ws = new WebSocket(CONFIG.WS_URL);
+                
+                state.ws.onopen = () => {
+                    console.log('WebSocket connected');
+                    state.connected = true;
+                    updateStatus('ready');
+                };
+                
+                state.ws.onmessage = (event) => {
+                    const data = JSON.parse(event.data);
+                    handleWebSocketMessage(data);
+                };
+                
+                state.ws.onclose = () => {
+                    console.log('WebSocket disconnected');
+                    state.connected = false;
+                    updateStatus('disconnected');
+                    // Reconnect after 3 seconds
+                    setTimeout(connectWebSocket, 3000);
+                };
+                
+                state.ws.onerror = (error) => {
+                    console.error('WebSocket error:', error);
+                    updateStatus('error');
+                };
+                
+            } catch (error) {
+                console.error('Failed to connect WebSocket:', error);
+                updateStatus('error');
+            }
+        }
+
+        function handleWebSocketMessage(data) {
+            switch (data.type) {
+                case 'status_change':
+                    updateStatus(data.data.status);
+                    break;
+                case 'message':
+                    appendMessage(data.data);
+                    break;
+                case 'action':
+                    appendAction(data.data);
+                    break;
+                case 'pong':
+                    // Heartbeat response
+                    break;
+            }
+        }
+
+        function sendWebSocketMessage(type, data = {}) {
+            if (state.ws && state.connected) {
+                state.ws.send(JSON.stringify({ type, ...data }));
+            }
+        }
+
+        // ============== Status Updates ==============
+        function updateStatus(status) {
+            state.agentStatus = status;
+            const badge = elements.statusBadge;
+            
+            const statusConfig = {
+                'ready': { class: 'bg-green-500/10 border-green-500/20 text-green-400', text: 'Ready', pulse: true },
+                'thinking': { class: 'bg-yellow-500/10 border-yellow-500/20 text-yellow-400', text: 'Thinking...', pulse: true },
+                'working': { class: 'bg-blue-500/10 border-blue-500/20 text-blue-400', text: 'Working...', pulse: true },
+                'error': { class: 'bg-red-500/10 border-red-500/20 text-red-400', text: 'Error', pulse: false },
+                'disconnected': { class: 'bg-gray-500/10 border-gray-500/20 text-gray-400', text: 'Disconnected', pulse: false },
+                'connecting': { class: 'bg-yellow-500/10 border-yellow-500/20 text-yellow-400', text: 'Connecting...', pulse: true }
+            };
+            
+            const config = statusConfig[status] || statusConfig['connecting'];
+            
+            badge.className = `px-2 py-0.5 rounded-full border text-[10px] font-medium flex items-center gap-1 ${config.class}`;
+            badge.innerHTML = `
+                <span class="w-1.5 h-1.5 rounded-full ${config.pulse ? 'bg-current animate-pulse' : 'bg-current'}"></span>
+                ${config.text}
+            `;
+        }
+
+        // ============== Chat Functions ==============
+        function appendMessage(msg) {
+            const isUser = msg.role === 'user';
+            const template = document.getElementById(isUser ? 'user-msg-template' : 'agent-msg-template');
+            const clone = template.content.cloneNode(true);
+            
+            clone.querySelector('.msg-text').textContent = msg.content;
+            
+            if (isUser) {
+                // User messages go to end
+                elements.chatMessages.appendChild(clone);
+            } else {
+                // Remove thinking indicator if exists
+                const thinking = document.getElementById('thinking-indicator');
+                if (thinking) thinking.remove();
+                
+                elements.chatMessages.appendChild(clone);
+            }
+            
+            scrollToBottom();
+            lucide.createIcons();
+        }
+
+        function appendThinking(text = 'Agent sedang berpikir...') {
+            // Remove existing thinking indicator
+            const existing = document.getElementById('thinking-indicator');
+            if (existing) existing.remove();
+            
+            const template = document.getElementById('thinking-template');
+            const clone = template.content.cloneNode(true);
+            clone.querySelector('#thinking-text').textContent = text;
+            
+            elements.chatMessages.appendChild(clone);
+            scrollToBottom();
+        }
+
+        function appendAction(action) {
+            const lastMsg = elements.chatMessages.lastElementChild;
+            if (lastMsg && lastMsg.querySelector('.msg-actions')) {
+                const actionsDiv = lastMsg.querySelector('.msg-actions');
+                actionsDiv.classList.remove('hidden');
+                
+                const template = document.getElementById('action-card-template');
+                const clone = template.content.cloneNode(true);
+                
+                clone.querySelector('.action-title').textContent = action.type || 'Action';
+                clone.querySelector('.action-content').textContent = action.event || '';
+                clone.querySelector('.action-status').textContent = action.status || 'In Progress';
+                clone.querySelector('.action-status').className = `action-status text-[10px] font-mono px-1.5 py-0.5 rounded bg-yellow-500/10 text-yellow-400`;
+                
+                actionsDiv.appendChild(clone);
+                scrollToBottom();
+            }
+        }
+
+        function scrollToBottom() {
+            elements.chatMessages.scrollTop = elements.chatMessages.scrollHeight;
+        }
+
+        // ============== Send Message ==============
+        async function sendMessage(text) {
+            if (!text.trim() || state.agentStatus === 'error') return;
+            
+            // Append user message
+            appendMessage({
+                role: 'user',
+                content: text
+            });
+            
+            // Clear input
+            elements.agentInput.value = '';
+            elements.agentInput.style.height = '';
+            elements.charCount.textContent = '0 characters';
+            
+            // Show thinking
+            appendThinking();
+            
+            // Send via WebSocket or API
+            if (state.connected) {
+                sendWebSocketMessage('chat', { message: text });
+            } else {
+                // Fallback to API
+                try {
+                    const response = await fetch(`${CONFIG.API_BASE}/api/chat`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ 
+                            message: text,
+                            workspace_path: state.workspacePath
+                        })
+                    });
+                    
+                    const data = await response.json();
+                    if (data.success) {
+                        // Remove thinking indicator
+                        const thinking = document.getElementById('thinking-indicator');
+                        if (thinking) thinking.remove();
+                        
+                        // Append agent response
+                        appendMessage(data.message);
+                    }
+                } catch (error) {
+                    console.error('API Error:', error);
+                    appendThinking('Error connecting to server...');
+                }
+            }
+        }
+
+        // ============== Event Listeners ==============
+        function setupEventListeners() {
+            // Form submission
+            elements.agentForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                sendMessage(elements.agentInput.value);
+            });
+            
+            // Textarea auto-resize
+            elements.agentInput.addEventListener('input', () => {
+                elements.agentInput.style.height = '';
+                elements.agentInput.style.height = Math.min(elements.agentInput.scrollHeight, 150) + 'px';
+                elements.charCount.textContent = `${elements.agentInput.value.length} characters`;
+            });
+            
+            // Enter key (without shift)
+            elements.agentInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    sendMessage(elements.agentInput.value);
+                }
+            });
+            
+            // Tab switching
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.addEventListener('click', () => switchTab(btn.dataset.tab));
+            });
+            
+            // New session
+            document.getElementById('btn-new-session').addEventListener('click', () => {
+                if (confirm('Start new session? Chat history will be cleared.')) {
+                    fetch(`${CONFIG.API_BASE}/api/chat/clear`, { method: 'POST' });
+                    elements.chatMessages.innerHTML = '';
+                    state.chatHistory = [];
+                    // Re-add intro
+                    initIntroMessage();
+                }
+            });
+            
+            // Terminal input
+            elements.terminalInput.addEventListener('keydown', async (e) => {
+                if (e.key === 'Enter') {
+                    const cmd = elements.terminalInput.value;
+                    elements.terminalInput.value = '';
+                    addTerminalLine(cmd, 'command');
+                    
+                    try {
+                        const response = await fetch(`${CONFIG.API_BASE}/api/terminal`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ command: cmd })
+                        });
+                        const data = await response.json();
+                        addTerminalLine(data.stdout, 'output');
+                        if (data.stderr) addTerminalLine(data.stderr, 'error');
+                    } catch (error) {
+                        addTerminalLine(`Error: ${error.message}`, 'error');
+                    }
+                }
+            });
+            
+            // Toggle workspace (mobile)
+            document.getElementById('btn-toggle-workspace')?.addEventListener('click', toggleWorkspace);
+        }
+
+        function addTerminalLine(text, type) {
+            const line = document.createElement('div');
+            const colorClass = type === 'command' ? 'text-blue-400' : 
+                              type === 'error' ? 'text-red-400' : 'text-gray-300';
+            line.className = colorClass;
+            line.textContent = type === 'command' ? `$ ${text}` : text;
+            elements.terminalOutput.appendChild(line);
+            elements.terminalOutput.scrollTop = elements.terminalOutput.scrollHeight;
+        }
+
+        function switchTab(tabName) {
+            // Hide all views
+            document.querySelectorAll('[id^="view-"]').forEach(view => {
+                view.classList.add('hidden');
+                view.classList.remove('flex', 'block');
+            });
+            
+            // Reset all tabs
+            document.querySelectorAll('.tab-btn').forEach(tab => {
+                tab.classList.remove('border-t-brand-500', 'bg-dark-900', 'text-gray-200');
+                tab.classList.add('border-t-transparent', 'text-gray-400');
+            });
+            
+            // Show selected view
+            const view = document.getElementById(`view-${tabName}`);
+            if (tabName === 'browser') {
+                view.classList.remove('hidden');
+                view.classList.add('flex');
+            } else {
+                view.classList.remove('hidden');
+                view.classList.add('block');
+            }
+            
+            // Style active tab
+            const activeTab = document.getElementById(`tab-${tabName}`);
+            activeTab.classList.remove('border-t-transparent', 'text-gray-400');
+            activeTab.classList.add('border-t-brand-500', 'bg-dark-900', 'text-gray-200');
+        }
+
+        function toggleWorkspace() {
+            const chatPanel = document.getElementById('chat-panel');
+            const workspacePanel = document.getElementById('workspace-panel');
+            
+            if (chatPanel.classList.contains('hidden')) {
+                chatPanel.classList.remove('hidden');
+                workspacePanel.classList.add('hidden');
+            } else {
+                chatPanel.classList.add('hidden');
+                workspacePanel.classList.remove('hidden');
+            }
+        }
+
+        function initIntroMessage() {
+            elements.introWorkspace.textContent = state.workspacePath;
+            elements.workspacePath.textContent = state.workspacePath;
+        }
+
+        // ============== Initialize App ==============
+        init();
+    </script>
+</body>
+</html>
