@@ -1,1 +1,26 @@
-Last updated: 2026-08-22 10:26:50 WIB
+# LUMIA
+
+
+
+## 📋 Overview
+
+This repository contains **16 files** and is built with the following technologies:
+
+Not detected
+
+## 🚀 Quick Start
+
+## ✨ Features
+
+- 📝 Auto-generated documentation
+
+## 🛠️ Technologies
+
+Not detected
+
+## 📄 License
+
+MIT License
+
+---
+*Last updated: 2026-08-22 10:33:53 WIB*
