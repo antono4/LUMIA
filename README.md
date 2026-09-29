@@ -10,8 +10,8 @@
 <p align="center">
   <a href="https://github.com/antono4/LUMIA"><img alt="GitHub repo" src="https://img.shields.io/badge/GitHub-antono4/LUMIA-blue?logo=github"></a>
   <a href="https://antono4.github.io/LUMIA/"><img alt="Live Demo" src="https://img.shields.io/badge/Live%20Demo-Online-success?logo=githubpages"></a>
-  <img alt="Files" src="https://img.shields.io/badge/Files-14-informational">
-  <img alt="Updated" src="https://img.shields.io/badge/Updated-2026-09-29 04:54:11 WIB-lightgrey">
+  <img alt="Files" src="https://img.shields.io/badge/Files-17-informational">
+  <img alt="Updated" src="https://img.shields.io/badge/Updated-2026-09-29 10:12:42 WIB-lightgrey">
 </p>
 
 ---
@@ -36,7 +36,7 @@ Berdasarkan isi repository, proyek ini menggunakan:
 - `HTML`
 - `Python`
 
-> Total **14 file** terdeteksi di repository.
+> Total **17 file** terdeteksi di repository.
 
 ## 🚀 Menjalankan Secara Lokal
 
@@ -62,4 +62,4 @@ Lihat berkas [`LICENSE`](./LICENSE) untuk informasi lisensi.
 
 ---
 
-<sub>README ini di-generate otomatis pada **2026-09-29 04:54:11 WIB** oleh GitHub Actions `.github/workflows/generate-readme.yml`.</sub>
+<sub>README ini di-generate otomatis pada **2026-09-29 10:12:42 WIB** oleh GitHub Actions `.github/workflows/generate-readme.yml`.</sub>
